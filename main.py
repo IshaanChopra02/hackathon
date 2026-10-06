@@ -8,6 +8,17 @@ from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI(title="StockSense API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://ishaanchopra02.github.io"], # Your GitHub Pages URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # --- INSTANT TERMINAL OTP DISPATCHER (ZERO SMTP ERRORS) ---
 def send_otp_email(receiver_email: str, otp_code: str):
