@@ -7,26 +7,17 @@ if (!userId) {
     window.location.href = '/login.html'; // Redirect to login if not authenticated
 }
 
-// --- HELPER TO PREVENT JSON PARSING CRASHES ---
-async function safeJsonParse(res) {
-    const contentType = res.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-        throw new Error(`Expected JSON but received HTML (Status ${res.status}). Check backend routes.`);
-    }
-    return await res.json();
-}
-
 // 3. Fetch and Render Products
 async function fetchProducts() {
     const tbody = document.getElementById('products-table-body');
     
     try {
-        const res = await fetch(`/products/?user_id=${userId}`);
+        // CHANGED: Added /api/ prefix
+        const res = await fetch(`/api/products/?user_id=${userId}`);
         
         if (!res.ok) throw new Error(`Products fetch failed: ${res.status}`);
         
-        // Use safe JSON parsing to prevent HTML 404 errors from crashing the script
-        const products = await safeJsonParse(res);
+        const products = await res.json();
         
         if (tbody) {
             tbody.innerHTML = ""; // Clear loading state
@@ -51,7 +42,7 @@ async function fetchProducts() {
     } catch (err) {
         console.error("Products Error:", err);
         if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: red;">Failed to load products: ${err.message}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: red;">Failed to load products.</td></tr>`;
         }
     }
 }
@@ -61,12 +52,12 @@ async function fetchDashboardData() {
     const container = document.getElementById('metrics-container');
     
     try {
-        const res = await fetch(`/dashboard/?user_id=${userId}`);
+        // CHANGED: Added /api/ prefix
+        const res = await fetch(`/api/dashboard/?user_id=${userId}`);
         
         if (!res.ok) throw new Error(`Dashboard fetch failed: ${res.status}`);
         
-        // Use safe JSON parsing
-        const data = await safeJsonParse(res);
+        const data = await res.json();
         
         if (container) {
             container.innerHTML = `
@@ -94,7 +85,6 @@ async function fetchDashboardData() {
 
 // 5. Initialize on Page Load
 document.addEventListener('DOMContentLoaded', () => {
-    // Only fetch data if the user is authenticated
     if (userId) {
         fetchDashboardData();
         fetchProducts();
