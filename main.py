@@ -277,7 +277,7 @@ def reset_password(req: OTPVerify, db: Session = Depends(get_db)):
 def get_locations(db: Session = Depends(get_db)):
     return db.query(Location).all()
 
-@app.get("/products/")
+@app.get("/api/products/")
 def get_products(user_id: int, db: Session = Depends(get_db)):
     return db.query(Product).filter(Product.user_id == user_id).all()
 
@@ -326,7 +326,7 @@ def process_stock_movement(movement: MovementCreate, db: Session = Depends(get_d
 def get_ledger(user_id: int, db: Session = Depends(get_db)):
     return db.query(StockMovement).filter(StockMovement.user_id == user_id).order_by(StockMovement.id.desc()).all()
 
-@app.get("/dashboard/")
+@app.get("/api/dashboard/")
 def get_dashboard(user_id: int, db: Session = Depends(get_db)):
     total_products = db.query(Product).filter(Product.user_id == user_id).count()
     low_stock_items = db.query(Product).filter(Product.user_id == user_id, Product.total_stock < 10).all()
