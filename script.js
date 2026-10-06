@@ -4,7 +4,16 @@ const userId = localStorage.getItem('user_id');
 // 2. Authentication Check
 if (!userId) {
     console.warn("No user ID found. Redirecting to login...");
-    window.location.href = '/index.html'; // Redirect to login if not authenticated
+    window.location.href = '/login.html'; // Redirect to login if not authenticated
+}
+
+// --- HELPER TO PREVENT JSON PARSING CRASHES ---
+async function safeJsonParse(res) {
+    const contentType = res.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+        throw new Error(`Expected JSON but received HTML (Status ${res.status}). Check backend routes.`);
+    }
+    return await res.json();
 }
 
 // 3. Fetch and Render Products
@@ -16,7 +25,8 @@ async function fetchProducts() {
         
         if (!res.ok) throw new Error(`Products fetch failed: ${res.status}`);
         
-        const products = await res.json();
+        // Use safe JSON parsing to prevent HTML 404 errors from crashing the script
+        const products = await safeJsonParse(res);
         
         if (tbody) {
             tbody.innerHTML = ""; // Clear loading state
@@ -41,7 +51,7 @@ async function fetchProducts() {
     } catch (err) {
         console.error("Products Error:", err);
         if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: red;">Failed to load products.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: red;">Failed to load products: ${err.message}</td></tr>`;
         }
     }
 }
@@ -55,7 +65,8 @@ async function fetchDashboardData() {
         
         if (!res.ok) throw new Error(`Dashboard fetch failed: ${res.status}`);
         
-        const data = await res.json();
+        // Use safe JSON parsing
+        const data = await safeJsonParse(res);
         
         if (container) {
             container.innerHTML = `
